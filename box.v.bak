@@ -1,0 +1,505 @@
+
+module music_box(
+input clk, 
+input sw, 
+output reg speaker);
+
+reg [30:0] sound;
+always @(posedge clk) 
+begin
+	sound <= sound+31'd1;
+end
+
+wire [7:0] tunes;
+music getnotes(.clk(clk), .sw(sw), .address(sound[29:22]), .notes(tunes));
+
+wire [2:0] octave;
+wire [3:0] notes;
+
+divide_12 getnotes_octave(.num(tunes[5:0]), .quotient(octave), .rem(notes));
+
+reg [8:0] clkdiv;
+always @*
+case(notes)
+	 0: clkdiv = 9'd511;//A
+	 1: clkdiv = 9'd482;// A#/Bb
+	 2: clkdiv = 9'd455;//B
+	 3: clkdiv = 9'd430;//C
+	 4: clkdiv = 9'd405;// C#/Db
+	 5: clkdiv = 9'd383;//D
+	 6: clkdiv = 9'd361;// D#/Eb
+	 7: clkdiv = 9'd341;//E
+	 8: clkdiv = 9'd322;//F
+	 9: clkdiv = 9'd303;// F#/Gb
+	10: clkdiv = 9'd286;//G
+	11: clkdiv = 9'd270;// G#/Ab
+	default: clkdiv = 9'd0;
+endcase
+
+reg [8:0] notes_count;
+reg [7:0] octave_counter;
+
+
+
+always @(posedge clk)
+begin
+
+	
+	
+
+	if(notes_count==0)
+	begin
+		 notes_count <= clkdiv;
+		
+			if(octave_counter==0)
+			begin
+		
+				octave_counter<=8'd255 >> octave;
+			end
+			
+			else
+			begin
+				octave_counter <= octave_counter-8'd1;
+			end
+			
+	end
+	
+	else 
+	begin
+		notes_count <= notes_count-9'd1;
+	end
+	
+	
+	
+	if(notes_count==0 && octave_counter==0)
+	begin
+		if(tunes!=0 && sound[21:18]!=0)
+		begin
+		speaker <= ~speaker;
+		end	
+	end
+	
+
+end
+
+endmodule
+
+
+
+module divide_12(
+	input [5:0] num,  // value to be divided by 12
+	output reg [2:0] quotient, 
+	output [3:0] rem
+);
+
+reg [1:0] rem_32;
+always @(num[5:2])
+begin 
+	quotient=(num[5:2])/3;
+	rem_32 = (num[5:2])%3;
+	
+end	
+	
+assign rem[1:0] = num[1:0];  // the first 2 bits will be copied exactly
+assign rem[3:2] = rem_32;  // last 2 bits will come from the case statement
+endmodule
+
+
+module music(input clk, input sw,input [7:0] address,output reg [7:0] notes);
+
+always @(posedge clk)
+if (sw== 1'b1)
+begin
+	// Jingle bells tune
+	case(address)
+		 
+			  
+		     0: notes<= 8'd22;
+	  		  1: notes<= 8'd22;
+			  
+			  2: notes<= 8'd22;
+			  3: notes<= 8'd22;
+			  
+			  4: notes<= 8'd22;
+			  5: notes<= 8'd22;
+			  6: notes<= 8'd22;
+			  7: notes<= 8'd22;
+			  
+			  8: notes<= 8'd00;
+			  
+			  9: notes<= 8'd22;
+			  10: notes<= 8'd22;
+			  
+			 11: notes<= 8'd22;
+			 12: notes<= 8'd22;
+			 
+			 13: notes<= 8'd22;
+			 14: notes<= 8'd22;
+			 15: notes<= 8'd22;
+			 16: notes<= 8'd22;
+			 
+			 17: notes<= 8'd00;
+			 
+			 18: notes<= 8'd22;
+		    19: notes<= 8'd22;
+			 
+			 20: notes<= 8'd25;
+			 21: notes<= 8'd25;
+			 
+			 22: notes<= 8'd18;
+			 23: notes<= 8'd18;
+			 
+			 24: notes<= 8'd20;
+			 25: notes<= 8'd00;
+		
+			 26: notes<= 8'd00;
+		
+			 27: notes<= 8'd22;
+			 28: notes<= 8'd22;
+			 29: notes<= 8'd22;
+			 30: notes<= 8'd22;
+			 31: notes<= 8'd22;
+			 32: notes<= 8'd22;
+			 33: notes<= 8'd22;
+			 34: notes<= 8'd22;
+		
+			 35: notes<= 8'd00;
+			 
+			 36: notes<= 8'd23;
+			 37: notes<= 8'd23;
+			 
+			 38: notes<= 8'd23;
+			 39: notes<= 8'd23;
+			 
+			 40: notes<= 8'd23;
+			 41: notes<= 8'd23;
+			 
+			 42: notes<= 8'd23;
+			 43: notes<= 8'd00;
+			 
+			 44: notes<= 8'd00;
+		
+			 45: notes<= 8'd23;
+			 46: notes<= 8'd23;
+		
+			 47: notes<= 8'd22;	 
+			 48: notes<= 8'd22;
+			 49: notes<= 8'd22;
+			 50: notes<= 8'd22;
+			 
+			 51: notes<= 8'd22;
+			 52: notes<= 8'd22;
+			 53: notes<= 8'd22;
+		
+			 54: notes<= 8'd00;
+		
+			 55: notes<= 8'd22;
+			 56: notes<= 8'd22;
+		
+			 57: notes<= 8'd20;
+			 58: notes<= 8'd20;
+		
+			 59: notes<= 8'd20;
+			 60: notes<= 8'd20;
+		
+			 61: notes<= 8'd22;
+			 62: notes<= 8'd22;
+		
+			 63: notes<= 8'd00;
+		
+			 64: notes<= 8'd20;
+			 65: notes<= 8'd20;
+			 66: notes<= 8'd20;
+			 67: notes<= 8'd20;
+			 68: notes<= 8'd20;
+		
+			 69: notes<= 8'd25;
+			 70: notes<= 8'd25;
+			 71: notes<= 8'd25;
+			 72: notes<= 8'd25;
+		
+			 73: notes<= 8'd00;
+		
+			 74: notes<= 8'd22;
+			 75: notes<= 8'd22;
+		
+			 76: notes<= 8'd22;
+			 77: notes<= 8'd22;
+		
+			 78: notes<= 8'd22;
+			 79: notes<= 8'd22;
+			 80: notes<= 8'd22;
+			 81: notes<= 8'd22;
+		
+			 82: notes<= 8'd00;
+		
+			 83: notes<= 8'd22;
+			 84: notes<= 8'd22;
+		
+			 85: notes<= 8'd22;
+			 86: notes<= 8'd22;
+		
+			 87: notes<= 8'd22;
+			 88: notes<= 8'd22;
+		
+			 89: notes<= 8'd22;
+			 90: notes<= 8'd22;
+			 91: notes<= 8'd22;
+			 92: notes<= 8'd22;
+		
+			 93: notes<= 8'd00;
+		
+			 94: notes<= 8'd22;
+			 95: notes<= 8'd22;
+		
+			 96: notes<= 8'd25;
+			 97: notes<= 8'd25;
+		
+			 98: notes<= 8'd18;
+			 99: notes<= 8'd18;
+		
+			100: notes<= 8'd20;
+		
+			101: notes<= 8'd00;
+			102: notes<= 8'd00;
+		
+			103: notes<= 8'd22;
+			104: notes<= 8'd22;
+			105: notes<= 8'd22;
+			106: notes<= 8'd22;
+			107: notes<= 8'd22;
+			108: notes<= 8'd22;
+			109: notes<= 8'd22;
+			110: notes<= 8'd22;
+		
+			111: notes<= 8'd00;
+		
+			112: notes<= 8'd23;
+			113: notes<= 8'd23;
+			114: notes<= 8'd23;
+			115: notes<= 8'd23;
+			116: notes<= 8'd23;
+			117: notes<= 8'd23;
+			118: notes<= 8'd23;
+			119: notes<= 8'd23;
+		
+			120: notes<= 8'd00;
+		
+			121: notes<= 8'd23;
+			122: notes<= 8'd23;
+		
+			123: notes<= 8'd22;
+			124: notes<= 8'd22;
+			125: notes<= 8'd22;
+			126: notes<= 8'd22;
+			127: notes<= 8'd22;
+			128: notes<= 8'd22;
+			129: notes<= 8'd22;
+		
+			130: notes<= 8'd00;
+		
+			131: notes<= 8'd25;
+			132: notes<= 8'd25;
+			133: notes<= 8'd25;
+			134: notes<= 8'd25;
+		
+			135: notes<= 8'd23;
+			136: notes<= 8'd23;
+		
+			137: notes<= 8'd20;
+			138: notes<= 8'd20;
+		
+			139: notes<= 8'd00;
+		
+			140: notes<= 8'd18;
+			141: notes<= 8'd18;
+			142: notes<= 8'd18;
+			143: notes<= 8'd18;
+			144: notes<= 8'd18;
+			145: notes<= 8'd18;
+			146: notes<= 8'd18;
+			147: notes<= 8'd18;
+			148: notes<= 8'd00;	
+			default: notes <= 8'd0;
+
+	endcase
+	end
+	
+	
+	else
+	begin
+		case(address)
+		  0: notes<= 8'd18;
+		  1: notes<= 8'd18;
+		  
+		  2: notes<= 8'd18;
+		  3: notes<= 8'd18;
+		  
+		  4: notes<= 8'd25;
+		  5: notes<= 8'd25;
+		  
+		  6: notes<= 8'd25;
+		  7: notes<= 8'd25;
+		  
+		  8: notes<= 8'd00;
+		  
+		  9: notes<= 8'd27;
+		  10: notes<= 8'd27;
+		  
+		 11: notes<= 8'd27;
+		 12: notes<= 8'd27;
+		 
+		 13: notes<= 8'd25;
+		 14: notes<= 8'd25;
+		 15: notes<= 8'd25;
+		 16: notes<= 8'd25;
+		 
+		 17: notes<= 8'd00;
+		 
+		 18: notes<= 8'd23;
+		 19: notes<= 8'd23;
+		 
+		 20: notes<= 8'd23;
+		 21: notes<= 8'd23;
+		 
+		 22: notes<= 8'd22;
+		 23: notes<= 8'd22;
+		 
+		 24: notes<= 8'd22;
+		 25: notes<= 8'd22;
+
+
+		 26: notes<= 8'd00;
+
+		 27: notes<= 8'd20;
+		 28: notes<= 8'd20;
+		 
+		 29: notes<= 8'd20;
+		 30: notes<= 8'd20;
+		 
+		 31: notes<= 8'd18;
+		 32: notes<= 8'd18;
+		 33: notes<= 8'd18;
+		 34: notes<= 8'd18;
+
+		 35: notes<= 8'd00;
+		 
+		 36: notes<= 8'd25;
+		 37: notes<= 8'd25;
+		 
+		 38: notes<= 8'd25;
+		 39: notes<= 8'd25;
+		 
+		 40: notes<= 8'd23;
+		 41: notes<= 8'd23;
+		 
+		 42: notes<= 8'd23;
+		 43: notes<= 8'd23;
+		 
+		 44: notes<= 8'd00;
+
+		 45: notes<= 8'd22;
+		 46: notes<= 8'd22;
+
+		 47: notes<= 8'd22;	 
+		 48: notes<= 8'd22;
+		 
+		 49: notes<= 8'd20;
+		 50: notes<= 8'd20;
+		 51: notes<= 8'd20;
+		 52: notes<= 8'd20;
+		 
+		 53: notes<= 8'd00;
+
+		 54: notes<= 8'd25;
+		 55: notes<= 8'd25;
+		 
+		 56: notes<= 8'd25;
+		 57: notes<= 8'd25;
+		 
+		 58: notes<= 8'd23;
+		 59: notes<= 8'd23;
+		 
+		 60: notes<= 8'd23;
+		 61: notes<= 8'd23;
+		 
+		 62: notes<= 8'd00;
+		
+
+		 63: notes<= 8'd22;
+		 64: notes<= 8'd22;
+		 
+		 65: notes<= 8'd22;
+		 66: notes<= 8'd22;
+		 
+		 67: notes<= 8'd20;
+		 68: notes<= 8'd20;
+		 69: notes<= 8'd20;
+		 70: notes<= 8'd20;
+		 
+		 71: notes<= 8'd00;
+		 
+		 72: notes<= 8'd18;
+		 73: notes<= 8'd18;
+		 
+		 74: notes<= 8'd18;
+		 75: notes<= 8'd18;
+
+		 76: notes<= 8'd25;
+		 77: notes<= 8'd25;
+
+		 78: notes<= 8'd25;
+		 79: notes<= 8'd25;
+		 
+		 80: notes<= 8'd00;
+		 
+		 81: notes<= 8'd27;
+		 82: notes<= 8'd27;
+
+		 83: notes<= 8'd27;
+		 84: notes<= 8'd27;
+
+		 85: notes<= 8'd25;
+		 86: notes<= 8'd25;
+		 87: notes<= 8'd25;
+		 88: notes<= 8'd25;
+
+		 89: notes<= 8'd00;
+		 
+		 90: notes<= 8'd23;
+		 91: notes<= 8'd23;
+		 
+		 92: notes<= 8'd23;
+		 93: notes<= 8'd23;
+
+		 94: notes<= 8'd22;
+		 95: notes<= 8'd22;
+		
+		 96: notes<= 8'd22;
+		 97: notes<= 8'd22;
+		 
+
+		 98: notes<= 8'd00;
+		 
+		 99: notes<= 8'd20;
+		100: notes<= 8'd20;
+		
+		101: notes<= 8'd20;
+		102: notes<= 8'd20;
+		
+		103: notes<= 8'd18;
+		104: notes<= 8'd18;
+		105: notes<= 8'd18;
+		106: notes<= 8'd18;
+	
+		107: notes<= 8'd00;
+		
+	
+		default: notes <= 8'd0; 
+			endcase
+		
+	
+	end
+endmodule
+
+
